@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: my-exporter  # 어플리케이션 레이블
+  name: my-exporter-service  # 서비스 이름
+spec:
+  ports:
+    - name: http-metrics  # 포트 이름
+      port: 9504  # 서비스 포트
+      protocol: TCP  # 프로토콜 타입
+      targetPort: 9504  # 타겟 포트
+  selector:
+    app.kubernetes.io/name: my-exporter  # 셀렉터 라벨
+  type: ClusterIP  # 서비스 타입
