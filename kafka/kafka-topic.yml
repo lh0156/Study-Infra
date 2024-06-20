@@ -1,0 +1,201 @@
+apiVersion: kafka.strimzi.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: my-topic-raw-data  # 메타데이터 이름
+  labels:
+    strimzi.io/cluster: "my-kafka-cluster"  # 클러스터 이름
+spec:
+  partitions: 3  # 파티션 수
+  replicas: 2  # 복제본 수
+  config:
+    retention.ms: 259200000  # 데이터 보존 기간 (3일)
+    compression.type: snappy  # 압축 타입
+---
+apiVersion: kafka.strimzi.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: my-topic-data  # 메타데이터 이름
+  labels:
+    strimzi.io/cluster: "my-kafka-cluster"  # 클러스터 이름
+spec:
+  partitions: 3  # 파티션 수
+  replicas: 2  # 복제본 수
+  config:
+    retention.ms: 259200000  # 데이터 보존 기간 (3일)
+    compression.type: snappy  # 압축 타입
+---
+apiVersion: kafka.strimzi.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: my-topic-stats  # 메타데이터 이름
+  labels:
+    strimzi.io/cluster: "my-kafka-cluster"  # 클러스터 이름
+spec:
+  partitions: 2  # 파티션 수
+  replicas: 2  # 복제본 수
+  config:
+    retention.ms: 259200000  # 데이터 보존 기간 (3일)
+    cleanup.policy: delete,compact  # 클린업 정책 (삭제 및 압축)
+    compression.type: snappy  # 압축 타입
+---
+apiVersion: kafka.strimzi.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: my-topic-stats-user  # 메타데이터 이름
+  labels:
+    strimzi.io/cluster: "my-kafka-cluster"  # 클러스터 이름
+spec:
+  partitions: 2  # 파티션 수
+  replicas: 2  # 복제본 수
+  config:
+    retention.ms: 259200000  # 데이터 보존 기간 (3일)
+    cleanup.policy: delete,compact  # 클린업 정책 (삭제 및 압축)
+    compression.type: snappy  # 압축 타입
+---
+apiVersion: kafka.strimzi.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: my-topic-raw-group1  # 메타데이터 이름
+  labels:
+    strimzi.io/cluster: "my-kafka-cluster"  # 클러스터 이름
+spec:
+  partitions: 1  # 파티션 수
+  replicas: 2  # 복제본 수
+  config:
+    retention.ms: 259200000  # 데이터 보존 기간 (3일)
+    compression.type: snappy  # 압축 타입
+---
+apiVersion: kafka.strimzi.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: my-topic-group1  # 메타데이터 이름
+  labels:
+    strimzi.io/cluster: "my-kafka-cluster"  # 클러스터 이름
+spec:
+  partitions: 1  # 파티션 수
+  replicas: 2  # 복제본 수
+  config:
+    retention.ms: 259200000  # 데이터 보존 기간 (3일)
+    compression.type: snappy  # 압축 타입
+---
+apiVersion: kafka.strimzi.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: my-topic-stats-group1  # 메타데이터 이름
+  labels:
+    strimzi.io/cluster: "my-kafka-cluster"  # 클러스터 이름
+spec:
+  partitions: 1  # 파티션 수
+  replicas: 2  # 복제본 수
+  config:
+    retention.ms: 259200000  # 데이터 보존 기간 (3일)
+    cleanup.policy: delete,compact  # 클린업 정책 (삭제 및 압축)
+    compression.type: snappy  # 압축 타입
+---
+apiVersion: kafka.strimzi.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: my-topic-stats-user-group1  # 메타데이터 이름
+  labels:
+    strimzi.io/cluster: "my-kafka-cluster"  # 클러스터 이름
+spec:
+  partitions: 1  # 파티션 수
+  replicas: 2  # 복제본 수
+  config:
+    retention.ms: 259200000  # 데이터 보존 기간 (3일)
+    cleanup.policy: delete,compact  # 클린업 정책 (삭제 및 압축)
+    compression.type: snappy  # 압축 타입
+---
+apiVersion: kafka.strimzi.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: my-topic-raw-group2  # 메타데이터 이름
+  labels:
+    strimzi.io/cluster: "my-kafka-cluster"  # 클러스터 이름
+spec:
+  partitions: 1  # 파티션 수
+  replicas: 2  # 복제본 수
+  config:
+    retention.ms: 259200000  # 데이터 보존 기간 (3일)
+    compression.type: snappy  # 압축 타입
+---
+apiVersion: kafka.strimzi.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: my-topic-group2  # 메타데이터 이름
+  labels:
+    strimzi.io/cluster: "my-kafka-cluster"  # 클러스터 이름
+spec:
+  partitions: 1  # 파티션 수
+  replicas: 2  # 복제본 수
+  config:
+    retention.ms: 259200000  # 데이터 보존 기간 (3일)
+    compression.type: snappy  # 압축 타입
+---
+apiVersion: kafka.strimzi.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: my-topic-stats-group2  # 메타데이터 이름
+  labels:
+    strimzi.io/cluster: "my-kafka-cluster"  # 클러스터 이름
+spec:
+  partitions: 1  # 파티션 수
+  replicas: 2  # 복제본 수
+  config:
+    retention.ms: 259200000  # 데이터 보존 기간 (3일)
+    cleanup.policy: delete,compact  # 클린업 정책 (삭제 및 압축)
+    compression.type: snappy  # 압축 타입
+---
+apiVersion: kafka.strimzi.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: my-topic-stats-user-group2  # 메타데이터 이름
+  labels:
+    strimzi.io/cluster: "my-kafka-cluster"  # 클러스터 이름
+spec:
+  partitions: 1  # 파티션 수
+  replicas: 2  # 복제본 수
+  config:
+    retention.ms: 259200000  # 데이터 보존 기간 (3일)
+    cleanup.policy: delete,compact  # 클린업 정책 (삭제 및 압축)
+    compression.type: snappy  # 압축 타입
+---
+apiVersion: kafka.strimzi.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: my-topic-raw-group3  # 메타데이터 이름
+  labels:
+    strimzi.io/cluster: "my-kafka-cluster"  # 클러스터 이름
+spec:
+  partitions: 1  # 파티션 수
+  replicas: 2  # 복제본 수
+  config:
+    retention.ms: 259200000  # 데이터 보존 기간 (3일)
+    compression.type: snappy  # 압축 타입
+---
+apiVersion: kafka.strimzi.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: my-topic-group3  # 메타데이터 이름
+  labels:
+    strimzi.io/cluster: "my-kafka-cluster"  # 클러스터 이름
+spec:
+  partitions: 1  # 파티션 수
+  replicas: 2  # 복제본 수
+  config:
+    retention.ms: 259200000  # 데이터 보존 기간 (3일)
+    compression.type: snappy  # 압축 타입
+---
+apiVersion: kafka.strimzi.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: my-topic-stats-group3  # 메타데이터 이름
+  labels:
+    strimzi.io/cluster: "my-kafka-cluster"  # 클러스터 이름
+spec:
+  partitions: 1  # 파티션 수
+  replicas: 2  # 복제본 수
+  config:
+    retention.ms: 259200000  # 데이터 보존 기간 (3일)
+    cleanup.policy: delete,compact  # 클린업 정책 (삭제 및 압축)
+    compression.type: snappy  # 압축 타입
