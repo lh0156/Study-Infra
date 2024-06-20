@@ -1,0 +1,156 @@
+apiVersion: kafka.strimzi.io/v1beta1  # API 버전
+kind: Kafka  # 리소스 종류 (Kafka 클러스터)
+metadata:
+  name: my-kafka-cluster  # Kafka 클러스터 이름
+  annotations:
+    prometheus.io/scrape: "true"  # Prometheus가 이 Kafka 클러스터의 메트릭을 스크래핑하도록 설정
+    prometheus.io/port: "9504"  # Prometheus가 메트릭을 수집할 포트 번호
+spec:
+  kafka:
+    replicas: 4  # Kafka 브로커의 복제본 수
+    version: 2.7.0  # Kafka 버전
+    listeners:
+      - name: plain  # 평문 리스너 설정
+        port: 9093  # 평문 리스너의 포트 번호
+        type: internal  # 내부 통신용 리스너
+        tls: false  # TLS를 사용하지 않음
+      - name: external  # 외부 리스너 설정
+        port: 9095  # 외부 리스너의 포트 번호
+        type: nodeport  # NodePort 타입으로 외부에 노출
+        tls: false  # TLS를 사용하지 않음
+    readinessProbe:
+      initialDelaySeconds: 20  # 준비 상태 프로브의 초기 지연 시간
+      timeoutSeconds: 20  # 준비 상태 프로브의 타임아웃 시간
+      failureThreshold: 20  # 준비 상태 프로브 실패 임계치
+    livenessProbe:
+      initialDelaySeconds: 20  # 생존 상태 프로브의 초기 지연 시간
+      timeoutSeconds: 20  # 생존 상태 프로브의 타임아웃 시간
+      failureThreshold: 20  # 생존 상태 프로브 실패 임계치
+    storage:
+      type: jbod  # JBOD(Just a Bunch Of Disks) 스토리지 타입
+      volumes:
+      - id: 0  # 볼륨 ID
+        type: persistent-claim  # 지속성 클레임 타입
+        size: 100Gi  # 볼륨 크기
+        deleteClaim: false  # 삭제 시 클레임을 삭제하지 않음
+    resources:
+      requests:
+        memory: 2Gi  # 요청 메모리 양
+        cpu: 2  # 요청 CPU 양
+      limits:
+        memory: 2Gi  # 최대 메모리 양
+        cpu: 2  # 최대 CPU 양
+    config:
+      offsets.topic.replication.factor: 4  # 오프셋 토픽의 복제 팩터
+      transaction.state.log.replication.factor: 4  # 트랜잭션 상태 로그의 복제 팩터
+      transaction.state.log.min.isr: 2  # 최소 ISR(In-Sync Replica) 수
+      log.message.format.version: "2.7"  # 로그 메시지 형식 버전
+    logging:
+      type: inline  # 로깅 타입 (인라인 설정)
+      loggers:
+        connect.root.logger.level: "DEBUG"  # 기본 로거 레벨
+    rack:
+      topologyKey: kubernetes.io/zone  # 랙 배치 전략 (클러스터 노드의 존)
+  zookeeper:
+    replicas: 4  # Zookeeper 복제본 수
+    storage:
+      type: persistent-claim  # 지속성 클레임 타입
+      size: 150Gi  # 볼륨 크기
+      deleteClaim: false  # 삭제 시 클레임을 삭제하지 않음
+    logging:
+      type: inline  # 로깅 타입 (인라인 설정)
+      loggers:
+        connect.root.logger.level: "DEBUG"  # 기본 로거 레벨
+  entityOperator:
+    topicOperator: {}  # 토픽 연산자 설정
+    userOperator: {}  # 사용자 연산자 설정
+  kafkaExporter:
+    topicRegex: ".*"  # 모든 토픽을 매치하는 정규 표현식
+    groupRegex: ".*"  # 모든 그룹을 매치하는 정규 표현식
+    template:
+      pod:
+        metadata:
+          annotations:
+            prometheus.io/scrape: "true"  # Prometheus가 메트릭을 스크래핑하도록 설정
+            prometheus.io/port: "9504"  # Prometheus가 메트릭을 수집할 포트 번호
+---
+kind: ConfigMap  # 리소스 종류 (ConfigMap)
+apiVersion: v1  # API 버전
+metadata:
+  name: my-kafka-metrics  # ConfigMap의 이름
+  labels:
+    app: my-strimzi  # 어플리케이션 레이블
+data:
+  kafka-metrics-config.yml: |
+    # JMX Prometheus Exporter 메트릭 설정. 자세한 정보는 https://github.com/prometheus/jmx_exporter 참조.
+    lowercaseOutputName: true  # 메트릭 이름을 소문자로 변환
+    rules:
+    # 특정한 케이스 및 세부 규칙 설정
+    - pattern: kafka.server<type=(.+), name=(.+), clientId=(.+), topic=(.+), partition=(.*)><>Value
+      name: kafka_server_$1_$2
+      type: GAUGE  # 계측기 타입
+      labels:
+       clientId: "$3"
+       topic: "$4"
+       partition: "$5"
+    - pattern: kafka.server<type=(.+), name=(.+), clientId=(.+), brokerHost=(.+), brokerPort=(.+)><>Value
+      name: kafka_server_$1_$2
+      type: GAUGE  # 계측기 타입
+      labels:
+       clientId: "$3"
+       broker: "$4:$5"
+    - pattern: kafka.server<type=(.+), cipher=(.+), protocol=(.+), listener=(.+), networkProcessor=(.+)><>connections
+      name: kafka_server_$1_connections_tls_info
+      type: GAUGE  # 계측기 타입
+      labels:
+        listener: "$2"
+        networkProcessor: "$3"
+        protocol: "$4"
+        cipher: "$5"
+    - pattern: kafka.server<type=(.+), clientSoftwareName=(.+), clientSoftwareVersion=(.+), listener=(.+), networkProcessor=(.+)><>connections
+      name: kafka_server_$1_connections_software
+      type: GAUGE  # 계측기 타입
+      labels:
+        clientSoftwareName: "$2"
+        clientSoftwareVersion: "$3"
+        listener: "$4"
+        networkProcessor: "$5"
+    - pattern: "kafka.server<type=(.+), listener=(.+), networkProcessor=(.+)><>(.+):"
+      name: kafka_server_$1_$4
+      type: GAUGE  # 계측기 타입
+      labels:
+       listener: "$2"
+       networkProcessor: "$3"
+    - pattern: kafka.server<type=(.+), listener=(.+), networkProcessor=(.+)><>(.+)
+      name: kafka_server_$1_$4
+      type: GAUGE  # 계측기 타입
+      labels:
+       listener: "$2"
+       networkProcessor: "$3"
+    # 일부 퍼센트 메트릭은 MeanRate 속성을 사용
+    # 예) kafka.server<type=(KafkaRequestHandlerPool), name=(RequestHandlerAvgIdlePercent)><>MeanRate
+    - pattern: kafka.(\w+)<type=(.+), name=(.+)Percent\w*><>MeanRate
+      name: kafka_$1_$2_$3_percent
+      type: GAUGE  # 계측기 타입
+    # 퍼센트에 대한 일반적인 게이지
+    - pattern: kafka.(\w+)<type=(.+), name=(.+)Percent\w*><>Value
+      name: kafka_$1_$2_$3_percent
+      type: GAUGE  # 계측기 타입
+    - pattern: kafka.(\w+)<type=(.+), name=(.+)Percent\w*, (.+)=(.+)><>Value
+      name: kafka_$1_$2_$3_percent
+      type: GAUGE  # 계측기 타입
+      labels:
+        "$4": "$5"
+    # 0-2 키/값 쌍을 가진 일반적인 초당 카운터
+    - pattern: kafka.(\w+)<type=(.+), name=(.+)PerSec\w*, (.+)=(.+), (.+)=(.+)><>Count
+      name: kafka_$1_$2_$3_total
+      type: COUNTER  # 카운터 타입
+      labels:
+        "$4": "$5"
+        "$6": "$7"
+    - pattern: kafka.(\w+)<type=(.+), name=(.+)PerSec\w*, (.+)=(.+)><>Count
+      name: kafka_$1_$2_$3_total
+      type: COUNTER  # 카운터 타입
+      labels:
+        "$4": "$5"
+    - pattern: kafka.(\w+)<type=(.+), name=(.+
