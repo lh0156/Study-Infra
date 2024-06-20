@@ -199,3 +199,17 @@ spec:
     retention.ms: 259200000  # 데이터 보존 기간 (3일)
     cleanup.policy: delete,compact  # 클린업 정책 (삭제 및 압축)
     compression.type: snappy  # 압축 타입
+---
+apiVersion: kafka.strimzi.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: my-topic-stats-user-group3  # 메타데이터 이름
+  labels:
+    strimzi.io/cluster: "my-kafka-cluster"  # 클러스터 이름
+spec:
+  partitions: 1  # 파티션 수
+  replicas: 2  # 복제본 수
+  config:
+    retention.ms: 259200000  # 데이터 보존 기간 (3일)
+    cleanup.policy: delete,compact  # 클린업 정책 (삭제 및 압축)
+    compression.type: snappy  # 압축 타입
