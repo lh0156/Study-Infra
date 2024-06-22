@@ -1,0 +1,272 @@
+global:
+  imagePullSecrets:
+    - my-registry-secret
+  storageClass: my-storage-class
+  redis: {}
+
+# 이미지 설정
+image:
+  registry: myregistry.com  # Docker 레지스트리
+  repository: my-repo/redis-cluster  # Docker 저장소
+  tag: 6.2.5  # 이미지 태그
+  pullPolicy: Always  # 이미지 풀 정책
+  pullSecrets:
+    - my-registry-secret  # 이미지 풀 시 사용할 시크릿
+
+nameOverride:
+
+fullnameOverride:
+
+# Redis 클러스터 설정
+cluster:
+  init: true  # Redis 클러스터 초기화 작업 활성화
+  nodes: 5  # 클러스터 노드 수
+  replicas: 1  # 마스터당 복제본 수
+  externalAccess:
+    enabled: true  # 외부 접근 허용
+    service:
+      type: LoadBalancer  # 서비스 타입
+      port: 6380  # 서비스 포트
+      loadBalancerIP: []  # 로드 밸런서 IP
+      annotations: {}  # 서비스 주석
+  update:
+    addNodes: false  # 노드 추가 후 업데이트 여부
+    currentNumberOfNodes: 5  # 현재 노드 수
+    newExternalIPs: []  # 새로운 외부 IP
+
+redis:
+  command: []  # 사용자 정의 명령어
+  args: []  # 사용자 정의 인수
+  useAOFPersistence: "no"  # AOF 지속성 사용 여부
+  port: 6380  # Redis 포트
+  lifecycleHooks:  # 라이프사이클 훅
+  extraVolumes: []  # 추가 볼륨
+  extraVolumeMounts: []  # 추가 볼륨 마운트
+  customLivenessProbe: {}  # 사용자 정의 생존 프로브
+  customReadinessProbe: {}  # 사용자 정의 준비 프로브
+  initContainers: []  # 추가 초기화 컨테이너
+  sidecars: []  # 추가 사이드카 컨테이너
+  podLabels: {}  # 파드 레이블
+  priorityClassName:
+  configmap:  # 추가 Redis 설정
+    |-
+    save ""
+    save 900 1
+    save 120 10000
+
+    repl-ping-replica-period 30
+    repl-timeout 300
+    repl-disable-tcp-nodelay yes
+    repl-backlog-size 1gb
+
+    maxmemory 2GB  # 최대 메모리
+    maxmemory-policy allkeys-lru  # 메모리 정책
+
+    io-threads 4  # IO 스레드 수
+
+    hz 60  # Redis 실행 주기
+
+    client-output-buffer-limit replica 0 0 60
+
+  extraEnvVars: []  # 추가 환경 변수
+  extraEnvVarsCM:
+  extraEnvVarsSecret:
+  podAnnotations: {}  # 파드 주석
+  resources:
+    requests:
+      memory: 512Mi  # 메모리 요청량
+      cpu: 200m  # CPU 요청량
+    limits:
+      memory: 1Gi  # 메모리 제한량
+      cpu: 500m  # CPU 제한량
+  schedulerName:
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 10  # 초기 지연 시간
+    periodSeconds: 10  # 주기 시간
+    timeoutSeconds: 3  # 타임아웃 시간
+    successThreshold: 1
+    failureThreshold: 3
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 10  # 초기 지연 시간
+    periodSeconds: 10  # 주기 시간
+    timeoutSeconds: 3  # 타임아웃 시간
+    successThreshold: 1
+    failureThreshold: 3
+  nodeSelector: {}  # 노드 선택자
+  tolerations: []  # 톨러레이션
+  affinity: {}  # 어피니티
+  topologySpreadConstraints: []  # 토폴로지 분산 제약 조건
+  busPort: 16380  # 버스 포트
+
+initJob:
+  activeDeadlineSeconds: 900  # 활성 데드라인 시간
+  command:
+  args:
+  annotations: {}  # 작업 주석
+  podAnnotations: {}  # 파드 주석
+  extraEnvVars: []  # 추가 환경 변수
+  extraEnvVarsCM:
+  extraEnvVarsSecret:
+  extraVolumes: []  # 추가 볼륨
+  extraVolumeMounts: []  # 추가 볼륨 마운트
+  initContainers: []  # 추가 초기화 컨테이너
+  nodeSelector: {}  # 노드 선택자
+  podLabels: {}  # 파드 레이블
+  tolerations: []  # 톨러레이션
+  affinity: {}  # 어피니티
+  resources:
+    limits: {}
+    requests: {}
+
+updateJob:
+  activeDeadlineSeconds: 900  # 활성 데드라인 시간
+  command:
+  args:
+  annotations: {}  # 작업 주석
+  podAnnotations: {}  # 파드 주석
+  podLabels: {}  # 파드 레이블
+  extraEnvVars: []  # 추가 환경 변수
+  extraEnvVarsCM:
+  extraEnvVarsSecret:
+  extraVolumes: []  # 추가 볼륨
+  extraVolumeMounts: []  # 추가 볼륨 마운트
+  initContainers: []  # 추가 초기화 컨테이너
+  nodeSelector: {}  # 노드 선택자
+  tolerations: []  # 톨러레이션
+  affinity: {}  # 어피니티
+  resources:
+    limits: {}
+    requests: {}
+
+networkPolicy:
+  enabled: true  # 네트워크 정책 사용 여부
+  allowExternal: false  # 외부 접근 허용 여부
+  ingressNSMatchLabels: {}  # 네임스페이스 매치 레이블
+  ingressNSPodMatchLabels: {}  # 파드 매치 레이블
+
+serviceAccount:
+  create: true  # 서비스 어카운트 생성 여부
+  name: my-service-account  # 서비스 어카운트 이름
+
+rbac:
+  create: true  # RBAC 생성 여부
+  role:
+    rules: []  # 역할 규칙
+
+podSecurityContext:
+  enabled: true  # 파드 보안 컨텍스트 사용 여부
+  fsGroup: 2000  # 파일 시스템 그룹
+  runAsUser: 2000  # 사용자 ID
+  sysctls: {}  # 시스템 제어
+
+podDisruptionBudget: {}
+containerSecurityContext:
+  enabled: true  # 컨테이너 보안 컨텍스트 사용 여부
+  runAsUser: 2000  # 사용자 ID
+  sysctls: {}  # 시스템 제어
+
+usePassword: true  # 패스워드 사용 여부
+password: "my-secure-password"  # Redis 패스워드
+existingSecret:
+existingSecretPasswordKey:
+usePasswordFile: false  # 패스워드를 파일로 사용할지 여부
+
+tls:
+  enabled: false  # TLS 사용 여부
+  authClients: true  # 클라이언트 인증 여부
+  certificatesSecret:
+  certFilename:
+  certKeyFilename:
+  certCAFilename:
+  dhParamsFilename:
+
+commonAnnotations: {}  # 공통 주석
+
+commonLabels: {}  # 공통 레이블
+
+service:
+  port: 6380  # 서비스 포트
+  annotations: {}  # 서비스 주석
+  labels: {}  # 서비스 레이블
+  type: ClusterIP  # 서비스 타입
+
+persistence:
+  enabled: true  # 퍼시스턴스 사용 여부
+  path: /data/redis  # 데이터 경로
+  subPath: ""
+  storageClass: my-storage-class  # 스토리지 클래스
+  accessModes:
+    - ReadWriteOnce  # 접근 모드
+  size: 200Gi  # 스토리지 크기
+  matchLabels: {}  # 볼륨 매치 레이블
+  matchExpressions: {}  # 볼륨 매치 표현식
+
+statefulset:
+  updateStrategy: RollingUpdate  # 업데이트 전략
+  rollingUpdatePartition:
+
+metrics:
+  enabled: true  # 메트릭 사용 여부
+  image:
+    registry: myregistry.com  # 메트릭 이미지 레지스트리
+    repository: my-repo/redis-exporter  # 메트릭 이미지 저장소
+    tag: 1.15.0  # 메트릭 이미지 태그
+    pullPolicy: IfNotPresent  # 메트릭 이미지 풀 정책
+    pullSecrets:
+    #   - myRegistryKeySecretName
+  resources:
+    requests:
+      memory: 64Mi  # 메트릭 컨테이너 메모리 요청량
+      cpu: 50m  # 메트릭 컨테이너 CPU 요청량
+    limits:
+      memory: 128Mi  # 메트릭 컨테이너 메모리 제한량
+      cpu: 100m  # 메트릭 컨테이너 CPU 제한량
+  extraArgs: {}  # 추가 인수
+  podAnnotations:
+    prometheus.io/scrape: "true"  # Prometheus 스크랩 여부
+    prometheus.io/port: "9210"  # Prometheus 포트
+  podLabels: {}  # 파드 레이블
+  serviceMonitor:
+    enabled: false  # 서비스 모니터 사용 여부
+    namespace:
+    interval:
+  prometheusRule:
+    enabled: false  # Prometheus 룰 사용 여부
+    additionalLabels: {}  # 추가 레이블
+    namespace: ""
+    rules: []  # 룰 정의
+  service:
+    type: ClusterIP  # 서비스 타입
+    loadBalancerIP:
+    annotations: {}  # 서비스 주석
+    labels: {}  # 서비스 레이블
+
+volumePermissions:
+  enabled: false  # 볼륨 권한 설정 컨테이너 사용 여부
+  image:
+    registry: myregistry.com  # 볼륨 권한 설정 이미지 레지스트리
+    repository: my-repo/minideb  # 볼륨 권한 설정 이미지 저장소
+    tag: buster  # 이미지 태그
+    pullPolicy: Always  # 이미지 풀 정책
+    pullSecrets:
+    #   - myRegistryKeySecretName
+  resources: {}
+
+sysctlImage:
+  enabled: false  # sysctl 컨테이너 사용 여부
+  command: []
+  registry: myregistry.com  # sysctl 이미지 레지스트리
+  repository: my-repo/minideb  # sysctl 이미지 저장소
+  tag: buster  # 이미지 태그
+  pullPolicy: Always  # 이미지 풀 정책
+  pullSecrets:
+  #   - myRegistryKeySecretName
+  mountHostSys: false  # 호스트 시스템 마운트 여부
+  resources: {}
+
+podSecurityPolicy:
+  create: false  # PodSecurityPolicy 생성 여부
+
+extraDeploy: []  # 추가 배포 설정
