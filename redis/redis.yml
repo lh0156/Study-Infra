@@ -20,7 +20,7 @@ fullnameOverride:
 # Redis 클러스터 설정
 cluster:
   init: true  # Redis 클러스터 초기화 작업 활성화
-  nodes: 5  # 클러스터 노드 수
+  nodes: 3  # 클러스터 노드 수
   replicas: 2  # 마스터당 복제본 수
   externalAccess:
     enabled: true  # 외부 접근 허용
